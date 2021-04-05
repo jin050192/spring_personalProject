@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+		<!DOCTYPE mapper
+    	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.spring.project.persistence.OrderDAO">
+	<insert id="insertOrder" parameterType="com.spring.project.vo.OrderVO">
+		INSERT INTO order_tbl(orderNum, status, id, num, count)
+		VALUES(to_number(to_char(sysdate, 'YYMMDD'),999999) || order_tbl_seq.nextval, 0, #{id}, #{num}, #{count})
+	</insert>
+
+	<select id="getOrderList" resultType="com.spring.project.vo.OrderVO">
+		select o.orderNum, o.id, o.num, o.count, p.img, p.name, p.price
+		  from order_tbl o
+			 , product_tbl p
+		 where o.num = p.num and o.id = #{id} and o.status = 0
+	</select>
+	
+	<select id="sumOrderList" resultType="int">
+		select sum(p.price*o.count) as sumMoney
+		  from order_tbl o
+			 , product_tbl p
+		 where o.num = p.num and o.id = #{id} and o.status = 0
+	</select>
+	
+	<update id="updateStatus" parameterType="String">
+		update order_tbl set status=1 where id=#{id} and status=0
+	</update>
+	
+	<delete id="deleteOrder" parameterType="String">
+		delete order_tbl where id=#{id} and status = 0
+	</delete>
+	
+	<select id="getOrderCnt" resultType="int">
+		select count(*) as cnt from order_tbl where id = #{id}
+	</select>
+	
+	<select id="getOrderList2" resultType="com.spring.project.vo.OrderVO" parameterType="java.util.Map">
+		<![CDATA[
+		select * from(select orderNum, status, id, num, count, img, name, price, (price * count) money, rowNum as rNum 
+						from(select o.orderNum, o.status, o.id, o.num, o.count, p.img, p.name, p.price 
+							   from order_tbl o, product_tbl p 
+							   where o.num = p.num and o.id = #{id} and o.status > 0 order by o.status, o.orderNum desc)) 
+		 where rNum >= #{start} and rNum <= #{end}
+		 ]]>
+	</select>
+	
+	<update id="cancelStatus" parameterType="java.util.Map">
+		update order_tbl set status=4 where orderNum=#{orderNum} and id=#{id}
+	</update>
+	
+	<update id="refundProduct" parameterType="int">
+		update order_tbl set status=5 where orderNum=#{orderNum} and status=3
+	</update>
+	
+	<!-- 승인대기 상품갯수 -->
+	<select id="getCnt1" resultType="int">
+		select count(*) as cnt from order_tbl where status = 1
+	</select>
+	
+	<!-- 승인대기 상품 리스트 -->
+	<select id="getOrderList3" resultType="com.spring.project.vo.OrderVO" parameterType="java.util.Map">
+		<![CDATA[
+		select * from(select orderNum, status, id, num, count, img, name, price, (price * count) money, rowNum as rNum 
+						 from(select o.orderNum, o.status, o.id, o.num, o.count, p.img, p.name, p.price 
+						 		from order_tbl o, product_tbl p where o.num = p.num and o.status = 1 order by o.status, o.orderNum desc)) 
+		 where rNum >= #{start} and rNum <= #{end}
+		]]> 
+	</select>
+	
+	<!-- 승인 처리 -->
+	<update id="confirmOrder" parameterType="int">
+		update order_tbl set status=2 where orderNum=#{orderNum} and status=1
+	</update>
+	
+	<!-- 배송중인 상품갯수 -->
+	<select id="getCnt2" resultType="int">
+		select count(*) as cnt from order_tbl where status = 2
+	</select>
+	
+	<!-- 배송중인 상품 리스트 -->
+	<select id="getOrderList4" resultType="com.spring.project.vo.OrderVO" parameterType="java.util.Map">
+		<![CDATA[
+		select * from(select orderNum, status, id, num, count, img, name, price, (price * count) money, rowNum as rNum 
+						 from(select o.orderNum, o.status, o.id, o.num, o.count, p.img, p.name, p.price 
+						 		from order_tbl o, product_tbl p where o.num = p.num and o.status = 2 order by o.status, o.orderNum desc)) 
+		 where rNum >= #{start} and rNum <= #{end}
+		]]> 
+	</select>
+	
+	<!-- 배송처리 -->
+	<update id="confirmDelivery" parameterType="int">
+		update order_tbl set status=3 where orderNum=#{orderNum} and status=2
+	</update>
+	
+	<!-- 주문취소 상품갯수 -->
+	<select id="getCnt3" resultType="int">
+		select count(*) as cnt from order_tbl where status = 4
+	</select>
+	
+	<!-- 주문취소 상품 리스트 -->
+	<select id="getOrderList5" resultType="com.spring.project.vo.OrderVO" parameterType="java.util.Map">
+		<![CDATA[
+		select * from(select orderNum, status, id, num, count, img, name, price, (price * count) money, rowNum as rNum 
+						 from(select o.orderNum, o.status, o.id, o.num, o.count, p.img, p.name, p.price 
+						 		from order_tbl o, product_tbl p where o.num = p.num and o.status = 4 order by o.status, o.orderNum desc)) 
+		 where rNum >= #{start} and rNum <= #{end}
+		]]> 
+	</select>
+	
+	<!-- 주문 취소 처리 -->
+	<delete id="deletePro" parameterType="int">
+		delete order_tbl where status=4 and orderNum = #{orderNum}
+	</delete>
+	
+	<!-- 환불요청 상품갯수 -->
+	<select id="getCnt4" resultType="int">
+		select count(*) as cnt from order_tbl where status = 5
+	</select>
+	
+	<!-- 환불요청 상품 리스트 -->
+	<select id="getOrderList6" resultType="com.spring.project.vo.OrderVO" parameterType="java.util.Map">
+		<![CDATA[
+		select * from(select orderNum, status, id, num, count, img, name, price, (price * count) money, rowNum as rNum 
+						 from(select o.orderNum, o.status, o.id, o.num, o.count, p.img, p.name, p.price 
+						 		from order_tbl o, product_tbl p where o.num = p.num and o.status = 5 order by o.status, o.orderNum desc)) 
+		 where rNum >= #{start} and rNum <= #{end}
+		]]> 
+	</select>
+	
+	<!-- 환불승인 처리 -->
+	<update id="refundPro" parameterType="int">
+		update order_tbl set status=7 where orderNum=#{orderNum} and status=5
+	</update>
+	
+	<!-- 환불승인 거부 -->
+	<update id="rejectRefund" parameterType="int">
+		update order_tbl set status=6 where orderNum=#{orderNum} and status=5
+	</update>
+	
+	<!-- 배송완료 상품갯수 -->
+	<select id="getCnt5" resultType="int">
+		select count(*) as cnt from order_tbl where status = 3
+	</select>
+	
+	<!-- 배송완료 상품 리스트 -->
+	<select id="getOrderList7" resultType="com.spring.project.vo.OrderVO" parameterType="java.util.Map">
+		<![CDATA[
+		select * from(select orderNum, status, id, num, count, img, name, price, (price * count) money, rowNum as rNum 
+						 from(select o.orderNum, o.status, o.id, o.num, o.count, p.img, p.name, p.price 
+						 		from order_tbl o, product_tbl p where o.num = p.num and o.status = 3 order by o.status, o.orderNum desc)) 
+		 where rNum >= #{start} and rNum <= #{end}
+		]]> 
+	</select>
+	
+	<!-- 환불승인 상품갯수 -->
+	<select id="getCnt6" resultType="int">
+		select count(*) as cnt from order_tbl where status = 7
+	</select>
+	
+	<!-- 환불승인 상품 리스트 -->
+	<select id="getOrderList8" resultType="com.spring.project.vo.OrderVO" parameterType="java.util.Map">
+		<![CDATA[
+		select * from(select orderNum, status, id, num, count, img, name, price, (price * count) money, rowNum as rNum 
+						 from(select o.orderNum, o.status, o.id, o.num, o.count, p.img, p.name, p.price 
+						 		from order_tbl o, product_tbl p where o.num = p.num and o.status = 7 order by o.status, o.orderNum desc)) 
+		 where rNum >= #{start} and rNum <= #{end}
+		]]> 
+	</select>
+	
+	<!-- 결산 -->
+	<select id="total" resultType="com.spring.project.vo.TotalVO">
+		select SUBSTR(trunc(ordernum / 1000000), 1,2) || '/' || SUBSTR(trunc(ordernum / 1000000), 3,2) month,
+		       sum(p.price * o.count) sum
+		  from product_tbl p, order_tbl o
+		 where p.num = o.num
+		   and o.status = 3
+		 group by trunc(ordernum / 1000000)
+		 order by trunc(ordernum / 1000000)
+	</select>
+</mapper>

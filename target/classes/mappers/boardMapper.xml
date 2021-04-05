@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+		<!DOCTYPE mapper
+    	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.spring.project.persistence.BoardDAO">		
+	<!-- 리스트 갯수 -->
+	<select id="getArticleCnt" resultType="int">
+		SELECT count(*) as cnt FROM board_tbl
+	</select>	
+	
+	<!-- 게시판 리스트 출력 -->
+	<select id="getArticleList" resultType="com.spring.project.vo.BoardVO" parameterType="java.util.Map">
+		<![CDATA[
+		SELECT *
+		FROM(SELECT num, id, pwd, subject, content, readCnt, ref, ref_step, ref_level, reg_date, rowNum rNum
+			   FROM(SELECT * FROM board_tbl
+				 	 order by ref desc, ref_step asc))
+		 WHERE rNum >= #{start} and rNum <= #{end}
+		]]>
+	</select>
+		
+	<!-- 조회수 증가 -->
+	<update id="addReadCnt" parameterType="int">
+		UPDATE board_tbl
+		   SET readCnt = readCnt+1 
+		 WHERE num=#{num}
+	</update>
+	
+	<!-- 게시글 정보 -->
+	<select id="getArticle" resultType="com.spring.project.vo.BoardVO">
+		SELECT * FROM board_tbl WHERE num=#{num}
+	</select>
+	
+	<!-- 게시글 num, pwd 확인 -->
+	<select id="numPwdCheck" parameterType="java.util.Map" resultType="int">
+		SELECT count(*) FROM board_tbl WHERE num=#{num} and pwd=#{pwd}
+	</select>
+	
+	<!-- 게시물 수정 처리 -->
+	<update id="updateBoard" parameterType="com.spring.project.vo.BoardVO">
+		update board_tbl set subject=#{subject, jdbcType=VARCHAR}, content=#{content, jdbcType=VARCHAR} where num=#{num}
+	</update>
+	
+	<!-- 글쓰기 처리1 -->
+	<select id="getMaxNum" resultType="int">
+		select max(num) as maxNum from board_tbl
+	</select>
+	
+	<!-- 글쓰기 처리2 -->
+	<update id="updateReply" parameterType="com.spring.project.vo.BoardVO">
+		<![CDATA[
+		update board_tbl set ref_step=ref_step+1 where ref= #{ref} and ref_step > #{ref_step}
+		]]>
+	</update>
+	
+	<!-- 글쓰기 처리3 -->
+	<insert id="insertBoard" parameterType="com.spring.project.vo.BoardVO">
+		insert into board_tbl(num, id, pwd, subject, content, readcnt, ref, ref_step, ref_level, reg_date)
+		values(board_tbl_seq.nextval,#{id},#{pwd},#{subject},#{content},0,#{ref},#{ref_step},#{ref_level},#{reg_date})
+	</insert>
+	
+	<!-- 글삭제 처리2 -->
+	<select id="checkReply" parameterType="java.util.Map" resultType="int">
+		select count(*) from board_tbl where ref=#{ref} and ref_step > #{ref_step} and ref_level= #{ref_level}
+	</select>
+	
+	<!-- 글삭제 처리3 -->
+	<delete id="deleteAll" parameterType="java.util.Map">
+		<![CDATA[
+		delete board_tbl where ref=#{ref} and ref_step >= #{ref_step} and ref_step < #{ref_step_a} 
+		]]>
+	</delete>
+	
+	<!-- 글삭제 처리4 -->
+	<delete id="deleteAll2" parameterType="java.util.Map">
+		<![CDATA[
+		delete board_tbl where ref=#{ref} and ref_step >= #{ref_step}
+		]]>
+	</delete>
+	
+ 	<!-- 리스트 갯수 -->
+  	<select id="getMyCnt" resultType="int">
+		SELECT count(*) as cnt FROM board_tbl WHERE id=#{id}
+	</select> 
+	
+	<!-- 게시판 리스트 출력 -->
+ 	<select id="getMyboardList" resultType="com.spring.project.vo.BoardVO" parameterType="java.util.Map">
+		<![CDATA[
+		SELECT *
+		FROM(SELECT num, id, pwd, subject, content, readCnt, ref, ref_step, ref_level, reg_date, rowNum rNum
+			   FROM(SELECT * FROM board_tbl
+				 	 WHERE id=#{id} order by ref desc, ref_step asc))
+		 WHERE rNum >= #{start} and rNum <= #{end}
+		]]>
+	</select> 
+</mapper>

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+		<!DOCTYPE mapper
+    	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.spring.project.persistence.ProductDAO">
+	<select id="bestItems" resultType="com.spring.project.vo.ProductVO">
+		<![CDATA[
+		SELECT * 
+		  FROM(SELECT num, sort, name, img, price, count, content, readCnt, reg_date, rowNum rNum
+		  	     FROM(SELECT * FROM product_tbl order by readcnt desc))
+		 WHERE rNum <= 4
+		 ]]>
+	</select>
+	
+	<select id="newItems" resultType="com.spring.project.vo.ProductVO">
+		<![CDATA[
+		SELECT * 
+		  FROM(SELECT num, sort, name, img, price, count, content, readCnt, reg_date, rowNum rNum
+		  	     FROM(SELECT * FROM product_tbl order by reg_date desc))
+		 WHERE rNum <= 4
+		 ]]>
+	</select>
+	
+	<!-- 리스트1 갯수 -->
+	<select id="getProCnt1" resultType="int">
+		SELECT count(*) as cnt FROM product_tbl WHERE sort = 1
+	</select>
+	
+	<!-- 리스트2 갯수 -->
+	<select id="getProCnt2" resultType="int">
+		SELECT count(*) as cnt FROM product_tbl WHERE sort = 2
+	</select>
+	
+	<!-- 리스트3 갯수 -->
+	<select id="getProCnt3" resultType="int">
+		SELECT count(*) as cnt FROM product_tbl WHERE sort = 3
+	</select>
+	
+	<!-- 리스트4 갯수 -->
+	<select id="getProCnt4" resultType="int">
+		SELECT count(*) as cnt FROM product_tbl WHERE sort = 4
+	</select>
+	
+	<!-- 리스트5 갯수 -->
+	<select id="getProCnt5" resultType="int">
+		SELECT count(*) as cnt FROM product_tbl WHERE sort = 5
+	</select>
+	
+	<!-- sort1 리스트 출력 -->
+	<select id="productList1" resultType="com.spring.project.vo.ProductVO" parameterType="java.util.Map">
+		<![CDATA[
+		SELECT *
+		FROM(SELECT num, sort, name, img, price, count, content, readcnt, reg_date, rowNum as rNum
+			   FROM(SELECT * FROM product_tbl
+				 	 WHERE sort = 1 order by reg_date desc))
+		 WHERE rNum >= #{start} and rNum <= #{end}
+		]]>
+	</select>
+	
+	<!-- sort2 리스트 출력 -->
+	<select id="productList2" resultType="com.spring.project.vo.ProductVO" parameterType="java.util.Map">
+		<![CDATA[
+		SELECT *
+		FROM(SELECT num, sort, name, img, price, count, content, readcnt, reg_date, rowNum as rNum
+			   FROM(SELECT * FROM product_tbl
+				 	 WHERE sort = 2 order by reg_date desc))
+		 WHERE rNum >= #{start} and rNum <= #{end}
+		]]>
+	</select>
+	
+	<!-- sort3 리스트 출력 -->
+	<select id="productList3" resultType="com.spring.project.vo.ProductVO" parameterType="java.util.Map">
+		<![CDATA[
+		SELECT *
+		FROM(SELECT num, sort, name, img, price, count, content, readcnt, reg_date, rowNum as rNum
+			   FROM(SELECT * FROM product_tbl
+				 	 WHERE sort = 1 order by reg_date desc))
+		 WHERE rNum >= #{start} and rNum <= #{end}
+		]]>
+	</select>
+	
+	<!-- sort4 리스트 출력 -->
+	<select id="productList4" resultType="com.spring.project.vo.ProductVO" parameterType="java.util.Map">
+		<![CDATA[
+		SELECT *
+		FROM(SELECT num, sort, name, img, price, count, content, readcnt, reg_date, rowNum as rNum
+			   FROM(SELECT * FROM product_tbl
+				 	 WHERE sort = 1 order by reg_date desc))
+		 WHERE rNum >= #{start} and rNum <= #{end}
+		]]>
+	</select>
+	
+	<!-- sort5 리스트 출력 -->
+	<select id="productList5" resultType="com.spring.project.vo.ProductVO" parameterType="java.util.Map">
+		<![CDATA[
+		SELECT *
+		FROM(SELECT num, sort, name, img, price, count, content, readcnt, reg_date, rowNum as rNum
+			   FROM(SELECT * FROM product_tbl
+				 	 WHERE sort = 2 order by reg_date desc))
+		 WHERE rNum >= #{start} and rNum <= #{end}
+		]]>
+	</select>
+	
+	<!-- 조회수 증가 -->
+	<update id="addReadCnt" parameterType="int">
+		UPDATE product_tbl
+		   SET readCnt = readCnt+1 
+		 WHERE num=#{num}
+	</update>
+	
+	<!-- 상품정보 조회 -->
+	<select id="getInfo" parameterType="int" resultType="com.spring.project.vo.ProductVO">
+		SELECT * FROM product_tbl WHERE num=#{num}
+	</select>
+	
+	<!-- 관리자 상품재고 리스트 갯수 -->
+	<select id="getProCnt" resultType="int">
+		SELECT count(*) as cnt FROM product_tbl
+	</select>
+	
+	<!-- 관리자 상품재고 리스트 -->
+	<select id="productList" resultType="com.spring.project.vo.ProductVO" parameterType="java.util.Map">
+		<![CDATA[
+		SELECT *
+		FROM(SELECT num, sort, name, img, price, count, content, readcnt, reg_date, rowNum as rNum
+			   FROM(SELECT * FROM product_tbl
+				 	 ORDER BY reg_date desc))
+		 WHERE rNum >= #{start} and rNum <= #{end}
+		]]>
+	</select>
+	
+	<!-- 재고 상품 추가 -->
+	<insert id="putProduct" parameterType="com.spring.project.vo.ProductVO">
+		INSERT INTO product_tbl(num, sort, name, img, price, count, content, readCnt, reg_date)
+		VALUES(product_tbl_seq.nextval, #{sort}, #{name}, #{img}, #{price}, #{count}, #{content, jdbcType=VARCHAR}, 0, #{reg_date})
+	</insert>
+	
+	<!-- 재고 상품 수정 -->
+	<update id="updateProduct" parameterType="com.spring.project.vo.ProductVO">
+		UPDATE product_tbl 
+		   SET sort=#{sort}, name=#{name}, price=#{price}, count=#{count}, content=#{content, jdbcType=VARCHAR} 
+		 WHERE num=#{num}
+	</update>
+	
+	<!-- 재고 상품 삭제 -->
+	<delete id="deleteProduct" parameterType="int">
+		DELETE product_tbl WHERE num=#{num}
+	</delete>
+</mapper>

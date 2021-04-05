@@ -1,0 +1,26 @@
+context.xml
+
+<!-- 커넥션 풀 : DBCP(DataBase Connection Pool) -->
+	<Resource auth="Container"
+    	driverClassName="oracle.jdbc.driver.OracleDriver"
+    	maxActive="5"
+    	maxIdle="3"
+    	maxWait="1000"
+    	type="javax.sql.DataSource"
+    	name="jdbc/Oracle11g"
+    	url="jdbc:oracle:thin:@localhost:1521:xe"
+    	username="jsp"
+    	password="tiger"
+    	factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+ />
+
+시작 url 
+http://192.168.219.121/EunsungPro/*.do
+
+로그인정보
+회원
+ID/PWD
+test/1234
+관리자
+ID/PWD
+관리자/1234

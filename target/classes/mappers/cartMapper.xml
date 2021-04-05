@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+		<!DOCTYPE mapper
+    	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.spring.project.persistence.CartDAO">
+	<select id="getCartCnt" resultType="int">
+		select count(*) as cnt from cart_tbl where id=#{id}
+	</select>
+	
+	<select id="getCartList" resultType="com.spring.project.vo.CartVO">
+		select c.cartNum, c.id, c.num, c.count, p.img, p.name, p.price, (p.price * c.count) as money
+		  from cart_tbl c
+		     , product_tbl p
+		 where c.num = p.num and c.id = #{id}
+	</select>
+	
+	<select id="sumCart" resultType="int">
+		select sum(p.price*c.count) as sumMoney
+		  from cart_tbl c
+			 , product_tbl p
+		 where c.num = p.num and c.id = #{id}
+	</select>
+	
+	<select id="confirmCart" resultType="int">
+		select count(*) from cart_tbl where id=#{id} and num=#{num}
+	</select>
+	
+	<update id="updateCart" parameterType="com.spring.project.vo.CartVO">
+		update cart_tbl set count = count + #{count} where num=#{num} and id=#{id}
+	</update>
+	
+	<insert id="insertCart" parameterType="com.spring.project.vo.CartVO">
+		INSERT INTO cart_tbl(cartNum, id, num, count)
+		VALUES(cart_tbl_seq.nextval, #{id}, #{num}, #{count})
+	</insert>
+	
+	<update id="updateCount" parameterType="java.util.Map">
+		update cart_tbl set count=#{count} where cartNum=#{cartNum} and id=#{id}
+	</update>
+	
+	<delete id="deleteProduct" parameterType="int">
+		delete cart_tbl where cartNum=#{cartNum}
+	</delete>
+</mapper>

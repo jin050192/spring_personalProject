@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+		<!DOCTYPE mapper
+    	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.spring.project.persistence.NoticeDAO">		
+	<!-- 리스트 갯수 -->
+	<select id="getArticleCnt" resultType="int">
+		SELECT count(*) as cnt FROM notice_tbl
+	</select>	
+	
+	<!-- 공지사항 리스트 출력 -->
+	<select id="getArticleList" resultType="com.spring.project.vo.NoticeVO" parameterType="java.util.Map">
+		<![CDATA[
+		SELECT *
+		FROM(SELECT num, writer, pwd, subject, content, readCnt, reg_date, rowNum as rNum
+			   FROM(SELECT * FROM notice_tbl
+				 	 order by num desc))
+		 WHERE rNum >= #{start} and rNum <= #{end}
+		]]>
+	</select>
+	
+	<!-- 조회수 증가 -->
+	<update id="addReadCnt" parameterType="int">
+		UPDATE notice_tbl
+		   SET readCnt = readCnt+1 
+		 WHERE num=#{num}
+	</update>
+	
+	<!-- 게시글 정보 -->
+	<select id="getArticle" resultType="com.spring.project.vo.NoticeVO">
+		SELECT * FROM notice_tbl WHERE num=#{num}
+	</select>
+	
+	<!-- 게시물 수정 처리 -->
+	<update id="updateBoard" parameterType="com.spring.project.vo.NoticeVO">
+		update notice_tbl set subject=#{subject, jdbcType=VARCHAR}, content=#{content, jdbcType=VARCHAR} where num=#{num}
+	</update>
+	
+	<!-- 글쓰기 처리 -->
+	<insert id="insertBoard" parameterType="com.spring.project.vo.BoardVO">
+		insert into notice_tbl(num, writer, pwd, subject, content, readcnt, reg_date)
+		values(notice_tbl_seq.nextval,#{writer},#{pwd},#{subject},#{content},0,#{reg_date})
+	</insert>
+	
+	<!-- 글삭제 처리 -->
+	<delete id="deleteBoard" parameterType="int">
+		delete notice_tbl where num=#{num}
+	</delete>
+		
+</mapper>
